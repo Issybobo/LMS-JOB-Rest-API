@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const { generateToken } = require("../config/jwtToken");
 
 const asyncHandler = require("express-async-handler");
+const validateMongoDbId = require("../config/validateMongoDbId");
 
 // Create a user
 
@@ -68,8 +69,21 @@ const getAllUser = asyncHandler(async (req, res) => {
 })
 
 // Update a user profile 
+const updateUser = asyncHandler(async( req, res) => {
+    const { _id } = req.user;
+    validateMongoDbId(_id);
+    try{
+        const user = await User.findByIdAndUpdate(_id, req.body, {new: true});
+        res.status(200).json({
+            status: true,
+            message: "Profile Updated Succesfully!", user
+        });
+    } catch (error) {
+        throw new Error (error);
+    }
+});
 
 
 
 
-module.exports = {registerAUser, loginUser, getAllUser};
+module.exports = {registerAUser, loginUser, getAllUser, updateUser};
