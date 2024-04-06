@@ -69,6 +69,10 @@ userSchema.pre("save", async function( next){
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-})
+});
+
+userSchema.methods.isPasswordMatched = async function (enteredpassword){
+    return await bcrypt.compare(enteredpassword, this.password)
+};
 
 module.exports = mongoose.model("LmsUser", userSchema);
