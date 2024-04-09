@@ -151,6 +151,28 @@ const unblockUser = asyncHandler(async (req, res) =>{
     }
 })
 
+// Update Password
+const updatePassword = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { password } = req.body;
+    validateMongoDbId(_id);
+    try {
+        const user = await User.findById(_id);
+        if (user && (await user.isPasswordMatched(password))) {
+            throw new Error("Please provide a new password instead of the old one");
+        } else {
+            user.password = password;
+            await user.save();
+            res.status(200).json({
+                status: true,
+                message: "Password Updated Successfully"
+            });
+        }
+    } catch (error) {
+        throw new Error (error)
+    }
+});
+
 
 
 
@@ -163,5 +185,6 @@ module.exports = {registerAUser,
         deleteAUser, 
         getAUser,
          blockUser,
-         unblockUser
+         unblockUser,
+         updatePassword
         };
