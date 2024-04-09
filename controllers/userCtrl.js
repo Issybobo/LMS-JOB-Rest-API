@@ -68,6 +68,19 @@ const getAllUser = asyncHandler(async (req, res) => {
     }
 })
 
+// Get A User
+
+const getAUser = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+    try {
+        //const getProfile
+    } catch (error) {
+        throw new Error(error)
+        
+    }
+})
+
+
 // Update a user profile 
 const updateUser = asyncHandler(async( req, res) => {
     const { _id } = req.user;
@@ -83,7 +96,24 @@ const updateUser = asyncHandler(async( req, res) => {
     }
 });
 
+// delete user 
+
+const deleteAUser = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+    try {
+        await User.findByIdAndUpdate(id);
+        res.status(200).json({
+            status: true,
+            message: "User Deleted Succesfully",
+        })
+        
+    } catch (error) {
+        throw new Error(error);
+        
+    }
+})
 
 
 
-module.exports = {registerAUser, loginUser, getAllUser, updateUser};
+
+module.exports = {registerAUser, loginUser, getAllUser, updateUser, deleteAUser};

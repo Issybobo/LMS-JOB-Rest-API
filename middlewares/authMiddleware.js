@@ -35,6 +35,7 @@ const isAdmin = asyncHandler(async (req, res, next) => {
 
 })
 
+
 const isInstructor = asyncHandler(async (req, res, next) => {
     const {email} = req.user;
     const isInstructor = await User.findOne({ email: email});
