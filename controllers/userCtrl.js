@@ -1,8 +1,9 @@
 const User = require("../models/userModel");
 const { generateToken } = require("../config/jwtToken");
-
+//const {createPasswordResetToken} = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const validateMongoDbId = require("../config/validateMongoDbId");
+const crypto = require("crypto");
 
 // Create a user
 
@@ -173,9 +174,47 @@ const updatePassword = asyncHandler(async (req, res) => {
     }
 });
 
+// forgot password token
 
 
+const forgotPasswordToken = asyncHandler(async (req, res) => {
+    const {email} = req.body;
+    const user = await User.findOne({email: email});
+    if(!user) throw new Error("User Not Exist with this email.");
+    try{
+        const token = await user.createPasswordResetToken(); // Corrected to use the user instance
+        await user.save();
+        const resetLink = `http://localhost:4000/api/user/reset-password/${token}`;
+        res.status(200).json(resetLink)
+    } catch (error){
+        throw new Error(error)
+    }
+})
 
+
+// Reset password
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const {password} = req.body;
+    const {token} = req.params;
+
+    if (!token) {
+        throw new Error("Token is missing");
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: {$gt: Date.now()},
+    });
+
+    if(!user) throw new Error("Token Expired, Please try again");
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    res.status(200).json({status: true, message: "Password Reset Succesfully"});
+})
 
 
 module.exports = {registerAUser,
@@ -186,5 +225,7 @@ module.exports = {registerAUser,
         getAUser,
          blockUser,
          unblockUser,
-         updatePassword
+         updatePassword,
+         forgotPasswordToken,
+         resetPassword
         };
